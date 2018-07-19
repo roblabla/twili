@@ -32,6 +32,13 @@ void ITwibDeviceInterface::Terminate(uint64_t process_id) {
 	obj.SendSyncRequest(protocol::ITwibDeviceInterface::Command::TERMINATE, std::vector<uint8_t>(process_id_bytes, process_id_bytes + sizeof(process_id)));
 }
 
+std::vector<AddressSpaceEntry> ITwibDeviceInterface::ListAddressSpace(uint64_t process_id) {
+	uint8_t *process_id_bytes = (uint8_t*) &process_id;
+	Response rs = obj.SendSyncRequest(protocol::ITwibDeviceInterface::Command::PRINT_ADDRESS_SPACE, std::vector<uint8_t>(process_id_bytes, process_id_bytes + sizeof(process_id)));
+	AddressSpaceEntry *first = (AddressSpaceEntry*) rs.payload.data();
+	return std::vector<AddressSpaceEntry>(first, first + (rs.payload.size() / sizeof(AddressSpaceEntry)));
+}
+
 std::vector<ProcessListEntry> ITwibDeviceInterface::ListProcesses() {
 	Response rs = obj.SendSyncRequest(protocol::ITwibDeviceInterface::Command::LIST_PROCESSES);
 	ProcessListEntry *first = (ProcessListEntry*) rs.payload.data();

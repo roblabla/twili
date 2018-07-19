@@ -169,6 +169,22 @@ Result<std::nullopt_t> Twili::CoreDump(std::vector<uint8_t> payload, usb::USBBri
     }
 }
 
+Result<std::nullopt_t> Twili::PrintAddressSpace(std::vector<uint8_t> payload, usb::USBBridge::USBResponseWriter &writer) {
+    if(payload.size() != sizeof(uint64_t)) {
+       return tl::make_unexpected(TWILI_ERR_BAD_REQUEST);
+    }
+    uint64_t pid = *(uint64_t*) payload.data();
+
+    auto proc = FindMonitoredProcess(pid);
+    if(!proc) {
+        printf("Getting address space for non-monitored process 0x%lx...\n", pid);
+       return Process(pid).PrintAddressSpace(writer);
+    } else {
+        printf("Getting address space for monitored process 0x%lx...\n", pid);
+	    return (*proc)->PrintAddressSpace(writer);
+    }
+}
+
 Result<std::nullopt_t> Twili::Terminate(std::vector<uint8_t> payload, usb::USBBridge::USBResponseWriter &writer) {
    if(payload.size() != sizeof(uint64_t)) {
       return tl::make_unexpected(TWILI_ERR_BAD_REQUEST);

@@ -324,6 +324,21 @@ void ListDevices(ITwibMetaInterface &iface) {
 	PrintTable(rows);
 }
 
+void ListAddressSpace(ITwibDeviceInterface &iface, uint64_t pid) {
+	std::vector<std::array<std::string, 5>> rows;
+	rows.push_back({"Start", "End", "Memory Type", "Memory Attribute", "Permission"});
+	auto address_spaces = iface.ListAddressSpace(pid);
+	for(auto p : address_spaces) {
+		rows.push_back({
+			ToHex(p.base_addr, true),
+			ToHex(p.base_addr + p.size, true),
+			ToHex(p.memory_type, true),
+			ToHex(p.memory_attribute, true),
+			ToHex(p.memory_permission, true)});
+	}
+	PrintTable(rows);
+}
+
 void ListProcesses(ITwibDeviceInterface &iface) {
 	std::vector<std::array<std::string, 5>> rows;
 	rows.push_back({"Process ID", "Result", "Title ID", "Process Name", "MMU Flags"});
@@ -386,6 +401,10 @@ int main(int argc, char *argv[]) {
 	terminate->add_option("pid", terminate_process_id, "Process ID")->required();
 	
 	CLI::App *ps = app.add_subcommand("ps", "List processes on the device");
+	CLI::App *pas = app.add_subcommand("pas", "Print address space of a process");
+	uint64_t pas_process_id;
+	pas->add_option("pid", pas_process_id, "Process ID")->required();
+
 	app.require_subcommand(1);
 	
 	try {
@@ -467,6 +486,11 @@ int main(int argc, char *argv[]) {
 
 	if(ps->parsed()) {
 		ListProcesses(itdi);
+		return 0;
+	}
+
+	if(pas->parsed()) {
+		ListAddressSpace(itdi, pas_process_id);
 		return 0;
 	}
 	

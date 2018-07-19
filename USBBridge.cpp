@@ -75,6 +75,7 @@ USBBridge::USBBridge(Twili *twili) :
 	AddRequestHandler(CommandID::RUN, std::bind(&Twili::Run, twili, std::placeholders::_1, std::placeholders::_2));
 	AddRequestHandler(CommandID::REBOOT, std::bind(&Twili::Reboot, twili, std::placeholders::_1, std::placeholders::_2));
 	AddRequestHandler(CommandID::COREDUMP, std::bind(&Twili::CoreDump, twili, std::placeholders::_1, std::placeholders::_2));
+	AddRequestHandler(CommandID::PRINT_ADDRESS_SPACE, std::bind(&Twili::PrintAddressSpace, twili, std::placeholders::_1, std::placeholders::_2));
 	AddRequestHandler(CommandID::TERMINATE, std::bind(&Twili::Terminate, twili, std::placeholders::_1, std::placeholders::_2));
 	AddRequestHandler(CommandID::LIST_PROCESSES, std::bind(&Twili::ListProcesses, twili, std::placeholders::_1, std::placeholders::_2));
 	AddRequestHandler(CommandID::UPGRADE_TWILI, std::bind(&Twili::UpgradeTwili, twili, std::placeholders::_1, std::placeholders::_2));

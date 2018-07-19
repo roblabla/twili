@@ -36,6 +36,7 @@ class ITwibDeviceInterface {
 		LIST_PROCESSES = 14,
 		UPGRADE_TWILI = 15,
 		IDENTIFY = 16,
+		PRINT_ADDRESS_SPACE = 17,
 	};
 };
 

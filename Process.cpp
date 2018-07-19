@@ -159,4 +159,41 @@ trn::Result<std::nullopt_t> Process::GenerateCrashReport(ELFCrashReport &report,
 	return report.Generate(debug, writer);
 }
 
+trn::Result<std::nullopt_t> Process::PrintAddressSpace(usb::USBBridge::USBResponseWriter &writer) {
+	uint64_t addr = 0;
+	memory_info_t memory_info[256];
+	uint32_t page_info;
+	result_t r;
+    int i = 0, j = 0;
+
+	trn::KDebug debug = ResultCode::AssertOk(
+		trn::svc::DebugActiveProcess(pid));
+
+	do {
+		printf("Querying memory for %lu\n", addr);
+		if((r = svcQueryDebugProcessMemory(&memory_info[i], &page_info, debug.handle, addr)) != RESULT_OK) {
+			goto fail;
+		}
+		addr = (uint64_t)memory_info[i].base_addr + memory_info[i].size;
+		i++;
+	} while(addr != 0);
+
+	{ auto _ = std::move(debug); }
+
+	writer.BeginOk((sizeof(uint64_t) * 2 + sizeof(uint32_t) * 4) * i);
+
+	for (j = 0; j < i; j++) {
+		writer.Write(memory_info[j].base_addr);
+		writer.Write(memory_info[j].size);
+		writer.Write(memory_info[j].memory_type);
+		writer.Write(memory_info[j].memory_attribute);
+		writer.Write(memory_info[j].permission);
+		writer.Write((uint32_t)0);
+	}
+	return std::nullopt;
+
+fail:
+	return ResultCode::ExpectOk(r);
+}
+
 } // namespace twili
